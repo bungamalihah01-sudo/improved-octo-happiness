@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ODMS | OSIS Digital Management System</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f3;color:#26372c}
+header{background:#174b32;color:white;padding:20px}
+header h2{margin:0}
+header p{margin:7px 0 0;color:#d9e8dc;font-size:13px}
+.menu{display:flex;overflow-x:auto;background:#fff;padding:10px;gap:8px}
+.menu button{border:0;background:#edf2ed;padding:12px;border-radius:8px;white-space:nowrap;color:#24543a;font-weight:bold}
+.menu button.active{background:#205b3b;color:white}
+main{padding:18px;max-width:850px;margin:auto}
+h2{font-size:21px}
+.card{background:white;padding:17px;border-radius:12px;margin:12px 0;box-shadow:0 2px 8px #0000000c}
+.stat{display:flex;gap:10px;flex-wrap:wrap}
+.stat .card{flex:1;min-width:130px}
+.number{font-size:27px;font-weight:bold;color:#24603d}
+small{color:#718075}
+input,textarea{width:100%;padding:12px;border:1px solid #ccd8ce;border-radius:8px;margin:7px 0 12px;font-size:15px}
+.action{background:#205b3b;color:white;border:0;padding:12px 17px;border-radius:8px;font-weight:bold}
+.item{padding:12px 0;border-bottom:1px solid #e6ece7}
+footer{text-align:center;padding:25px;color:#849087;font-size:12px}
+</style>
+</head>
+<body>
+
+<header>
+<h2>ODMS</h2>
+<p>OSIS Digital Management System</p>
+<p>SMK Darul Muslim</p>
+</header>
+
+<nav class="menu" id="menu">
+<button class="active" onclick="showPage('Dashboard',this)">Dashboard</button>
+<button onclick="showPage('Program Kerja',this)">Program Kerja</button>
+<button onclick="showPage('Kalender',this)">Kalender</button>
+<button onclick="showPage('Surat',this)">Surat</button>
+<button onclick="showPage('Arsip',this)">Arsip</button>
+<button onclick="showPage('Pengurus',this)">Pengurus</button>
+</nav>
+
+<main id="content"></main>
+
+<footer>ODMS © 2026 | Sistem Administrasi OSIS</footer>
+
+<script>
+let programs=JSON.parse(localStorage.getItem('odmsPrograms')||'[]');
+
+function showPage(page,btn){
+document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
+if(btn)btn.classList.add('active');
+let c=document.getElementById('content');
+
+if(page==='Dashboard'){
+c.innerHTML=`
+<h2>Dashboard</h2>
+<p>Selamat datang di pusat administrasi OSIS.</p>
+<div class="stat">
+<div class="card"><small>Program Kerja</small><div class="number">${programs.length}</div></div>
+<div class="card"><small>Sistem</small><div class="number">Aktif</div></div>
+</div>
+<div class="card"><h3>ODMS</h3><p>Satu sistem untuk membantu pengelolaan administrasi, kegiatan, dan dokumentasi OSIS secara digital.</p></div>
+<div class="card"><h3>Informasi</h3><p>Gunakan menu di atas untuk mengelola data organisasi.</p></div>`;
+}
+
+if(page==='Program Kerja'){
+c.innerHTML=`
+<h2>Program Kerja</h2>
+<div class="card">
+<h3>Tambah Program Kerja</h3>
+<input id="programName" placeholder="Nama program kerja">
+<textarea id="programDesc" placeholder="Deskripsi program kerja"></textarea>
+<button class="action" onclick="addProgram()">Simpan Program</button>
+</div>
+<div class="card"><h3>Daftar Program</h3>
+<div id="programList"></div></div>`;
+renderPrograms();
+}
+
+if(page==='Kalender'){
+c.innerHTML=`<h2>Kalender Kegiatan</h2>
+<div class="card"><p>Kelola jadwal kegiatan OSIS di sini.</p>
+<input type="date" id="eventDate">
+<input id="eventName" placeholder="Nama kegiatan">
+<button class="action" onclick="addEvent()">Simpan Jadwal</button>
+<div id="eventList"></div></div>`;
+renderEvents();
+}
+
+if(page==='Surat'){
+c.innerHTML=`<h2>Administrasi Surat</h2>
+<div class="card"><h3>Pencatatan Surat</h3>
+<input placeholder="Nomor surat">
+<input placeholder="Perihal surat">
+<input type="date">
+<p><small>Menu pencatatan surat akan dikembangkan selanjutnya.</small></p>
+</div>`;
+}
+
+if(page==='Arsip'){
+c.innerHTML=`<h2>Arsip Digital</h2>
+<div class="card"><h3>Penyimpanan Dokumen</h3>
+<p>Tempat pengelolaan dokumen dan berkas organisasi.</p>
+<p>Fitur unggah dan penyimpanan arsip akan dikembangkan selanjutnya.</p></div>`;
+}
+
+if(page==='Pengurus'){
+c.innerHTML=`<h2>Data Pengurus</h2>
+<div class="card"><h3>Struktur Organisasi</h3>
+<p>Ketua OSIS</p><p>Wakil Ketua</p><p>Sekretaris</p><p>Bendahara</p>
+<p><small>Data pengurus dapat dilengkapi pada tahap berikutnya.</small></p></div>`;
+}
+}
+
+function addProgram(){
+let name=document.getElementById('programName').value.trim();
+let desc=document.getElementById('programDesc').value.trim();
+if(!name){alert('Isi nama program terlebih dahulu');return;}
+programs.push({name,desc});
+localStorage.setItem('odmsPrograms',JSON.stringify(programs));
+showPage('Program Kerja',document.querySelectorAll('.menu button')[1]);
+}
+
+function renderPrograms(){
+let list=document.getElementById('programList');
+if(!list)return;
+list.innerHTML=programs.length?programs.map((p,i)=>`
+<div class="item"><b>${escapeHTML(p.name)}</b><p>${escapeHTML(p.desc)}</p></div>
+`).join(''):'<p>Belum ada program kerja.</p>';
+}
+
+function addEvent(){
+let date=document.getElementById('eventDate').value;
+let name=document.getElementById('eventName').value.trim();
+if(!date||!name){alert('Lengkapi tanggal dan kegiatan');return;}
+let events=JSON.parse(localStorage.getItem('odmsEvents')||'[]');
+events.push({date,name});
+localStorage.setItem('odmsEvents',JSON.stringify(events));
+renderEvents();
+document.getElementById('eventName').value='';
+}
+
+function renderEvents(){
+let list=document.getElementById('eventList');
+if(!list)return;
+let events=JSON.parse(localStorage.getItem('odmsEvents')||'[]');
+list.innerHTML='<h3>Daftar Jadwal</h3>'+(
+events.length?events.map(e=>`<div class="item">${escapeHTML(e.date)} — ${escapeHTML(e.name)}</div>`).join(''):'<p>Belum ada jadwal.</p>'
+);
+}
+
+function escapeHTML(s){
+return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+showPage('Dashboard',document.querySelector('.menu button'));
+</script>
+</body>
+</html>
